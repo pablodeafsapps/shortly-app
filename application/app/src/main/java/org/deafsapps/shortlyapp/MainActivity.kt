@@ -3,45 +3,183 @@ package org.deafsapps.shortlyapp
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Surface
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.*
+import androidx.compose.material.*
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.paint
+import androidx.compose.ui.res.colorResource
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.squareup.moshi.Moshi
+import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import org.deafsapps.shortlyapp.common.base.StatefulViewModel
+import org.deafsapps.shortlyapp.common.utils.getRetrofitInstance
 import org.deafsapps.shortlyapp.ui.theme.ShortlyAppTheme
+import org.deafsapps.shortlyapp.urlshortening.data.datasource.ShrtcodeDatasource
+import org.deafsapps.shortlyapp.urlshortening.data.repository.ShortenUrlRepository
+import org.deafsapps.shortlyapp.urlshortening.domain.usecase.ShortenUrlUc
+import org.deafsapps.shortlyapp.urlshortening.presentation.view.ShortenedUrlHistoryScreen
+import org.deafsapps.shortlyapp.urlshortening.presentation.view.WelcomeScreen
+import org.deafsapps.shortlyapp.urlshortening.presentation.viewmodel.ShortenUrlViewModel
+import retrofit2.converter.moshi.MoshiConverterFactory
 
 class MainActivity : ComponentActivity() {
 
+    private val shortenUrlViewModelProvider : ShortenUrlViewModel.Provider by lazy {
+        ShortenUrlViewModel.Provider(
+            shortenUrlUc = ShortenUrlUc(
+                repository = ShortenUrlRepository.apply {
+                    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                    shortenUrlDatasource = ShrtcodeDatasource(
+                        retrofit = getRetrofitInstance(converterFactory = MoshiConverterFactory.create(moshi))
+                    )
+                }
+            ),
+            owner = this
+        )
+    }
+    private val shortenUrlViewModel: StatefulViewModel<ShortenUrlViewModel.UiState> by lazy {
+        ViewModelProvider(this, shortenUrlViewModelProvider)[ShortenUrlViewModel::class.java]
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { ShortlyApp() }
+        setContent { ShortlyApp(viewModel = shortenUrlViewModel as? ShortenUrlViewModel) }
     }
 
 }
 
+@OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
-private fun ShortlyApp() {
+private fun ShortlyApp(viewModel: ShortenUrlViewModel?) {
     ShortlyAppTheme {
-        Surface(
-            modifier = Modifier.fillMaxSize(),
-            color = MaterialTheme.colors.background
-        ) {
-            Greeting("Android")
+        val navController: NavHostController = rememberNavController()
+        val uiState: State<ShortenUrlViewModel.UiState>? = viewModel?.uiState?.collectAsStateWithLifecycle()
+        Scaffold(
+            bottomBar = {
+                ShortlyBottomComponent(
+                    hasInputError = uiState?.value?.hasInputError,
+                    onShortenUrlSelected = { urlString ->
+                    if (navController.currentDestination?.route == Welcome.route) {
+                        navController.navigate(ShortenedUrlHistory.route)
+                    }
+                    viewModel?.onShortenUrlSelected(urlString = urlString)
+                }
+                )
+            }
+        ) { innerPadding ->
+            ShortlyNavHost(
+                navController = navController,
+                modifier = Modifier.padding(innerPadding)
+            )
         }
     }
 }
 
 @Composable
-fun Greeting(name: String) {
-    Text(text = "Hello $name!")
+fun ShortlyNavHost(
+    navController: NavHostController,
+    modifier: Modifier = Modifier
+) {
+    NavHost(
+        navController = navController,
+        startDestination = Welcome.route,
+        modifier = modifier
+    ) {
+        composable(route = Welcome.route) {
+            WelcomeScreen()
+        }
+        composable(route = ShortenedUrlHistory.route) {
+            ShortenedUrlHistoryScreen()
+        }
+    }
+
+}
+
+@Composable
+fun ShortlyBottomComponent(
+    hasInputError: Boolean?,
+    onShortenUrlSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var inputValue by remember { mutableStateOf("") }
+    Column(
+        modifier = Modifier
+            .background(colorResource(id = R.color.dark_violet))
+            .paint(
+                painter = painterResource(R.drawable.default_shape), alignment = Alignment.TopEnd
+            )
+            .padding(32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Box(
+            contentAlignment = Alignment.Center
+        ) {
+            OutlinedTextField(
+                value = inputValue,
+                onValueChange = { inputValue = it },
+                isError = hasInputError ?: false,
+                colors = TextFieldDefaults.textFieldColors(
+                    backgroundColor = colorResource(id = R.color.white)
+                ),
+                textStyle = LocalTextStyle.current.copy(
+                    fontSize = 16.sp, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold
+                ),
+                placeholder = { ShortenUrlPlaceholder(hasInputError = hasInputError) },
+                modifier = Modifier.height(64.dp).fillMaxSize()
+            )
+        }
+        Button(
+            colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.cyan)),
+            onClick = {
+                onShortenUrlSelected(inputValue)
+                inputValue = ""
+                      },
+            modifier = Modifier.padding(top = 10.dp).height(64.dp).fillMaxWidth()
+        ) {
+            Text(
+                text = stringResource(id = R.string.shorten_it),
+                color = colorResource(id = R.color.white),
+                style = MaterialTheme.typography.h5,
+                fontWeight = FontWeight.Bold
+            )
+        }
+    }
+}
+
+@Composable
+private fun ShortenUrlPlaceholder(hasInputError: Boolean?) {
+    Text(
+        text = stringResource(id = if (hasInputError == true) R.string.please_add_a_link_here else R.string.shorten_a_link_here),
+        color = colorResource(id = if (hasInputError == true) R.color.red else R.color.light_gray),
+        fontSize = 16.sp,
+        fontWeight = FontWeight.SemiBold,
+        textAlign = TextAlign.Center,
+        modifier = Modifier
+            .padding(top = 5.dp)
+            .fillMaxSize()
+    )
 }
 
 @Preview(showBackground = true)
 @Composable
-fun DefaultPreview() {
-    ShortlyAppTheme() {
-        Greeting("Android")
+fun ShortlyBottomComponentPreview() {
+    ShortlyAppTheme {
+        ShortlyBottomComponent(hasInputError = false, onShortenUrlSelected = {})
     }
 }

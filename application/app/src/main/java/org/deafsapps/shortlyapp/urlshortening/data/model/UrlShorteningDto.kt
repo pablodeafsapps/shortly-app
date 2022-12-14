@@ -5,13 +5,9 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class ShortenUrlOperationDto(
-    @Json(name = "ok") val status: ShortenUrlOpStatusDto,
+    @Json(name = "ok") val status: Boolean,
     @Json(name = "result") val result: ShortenUrlOpResultDto
 )
-
-@JsonClass(generateAdapter = true)
-@JvmInline
-value class ShortenUrlOpStatusDto(val isSuccessful: Boolean)
 
 @JsonClass(generateAdapter = true)
 data class ShortenUrlOpResultDto(
