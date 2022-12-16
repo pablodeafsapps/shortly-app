@@ -25,31 +25,39 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.room.Room
 import com.squareup.moshi.Moshi
 import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
 import org.deafsapps.shortlyapp.common.base.StatefulViewModel
+import org.deafsapps.shortlyapp.common.data.db.ApplicationDatabase
+import org.deafsapps.shortlyapp.common.data.repository.UrlRepository
+import org.deafsapps.shortlyapp.common.presentation.viewmodel.ShortenUrlViewModel
 import org.deafsapps.shortlyapp.common.utils.getRetrofitInstance
 import org.deafsapps.shortlyapp.ui.theme.ShortlyAppTheme
+import org.deafsapps.shortlyapp.urlhistory.data.datasource.ShortenUrlHistoryDataSource
 import org.deafsapps.shortlyapp.urlshortening.data.datasource.ShrtcodeDatasource
-import org.deafsapps.shortlyapp.urlshortening.data.repository.ShortenUrlRepository
-import org.deafsapps.shortlyapp.urlshortening.domain.usecase.ShortenUrlUc
+import org.deafsapps.shortlyapp.urlshortening.domain.usecase.ShortenAndPersistUrlUc
 import org.deafsapps.shortlyapp.urlshortening.presentation.view.ShortenedUrlHistoryScreen
 import org.deafsapps.shortlyapp.urlshortening.presentation.view.WelcomeScreen
-import org.deafsapps.shortlyapp.urlshortening.presentation.viewmodel.ShortenUrlViewModel
 import retrofit2.converter.moshi.MoshiConverterFactory
 
 class MainActivity : ComponentActivity() {
 
     private val shortenUrlViewModelProvider : ShortenUrlViewModel.Provider by lazy {
         ShortenUrlViewModel.Provider(
-            shortenUrlUc = ShortenUrlUc(
-                repository = ShortenUrlRepository.apply {
+            shortenAndPersistUrlUc = ShortenAndPersistUrlUc(
+                shortenUrlRepository = UrlRepository.apply {
                     val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
                     shortenUrlDatasource = ShrtcodeDatasource(
                         retrofit = getRetrofitInstance(converterFactory = MoshiConverterFactory.create(moshi))
                     )
-                }
-            ),
+                }, urlHistoryRepository = UrlRepository.apply {
+                    urlHistoryDatasource = ShortenUrlHistoryDataSource(
+                        roomDatabaseInstance = Room.databaseBuilder(
+                            applicationContext, ApplicationDatabase::class.java, "shorten-url-db"
+                        ).build()
+                    )
+                }),
             owner = this
         )
     }
@@ -141,7 +149,9 @@ fun ShortlyBottomComponent(
                     fontSize = 16.sp, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold
                 ),
                 placeholder = { ShortenUrlPlaceholder(hasInputError = hasInputError) },
-                modifier = Modifier.height(64.dp).fillMaxSize()
+                modifier = Modifier
+                    .height(64.dp)
+                    .fillMaxSize()
             )
         }
         Button(
@@ -150,7 +160,10 @@ fun ShortlyBottomComponent(
                 onShortenUrlSelected(inputValue)
                 inputValue = ""
                       },
-            modifier = Modifier.padding(top = 10.dp).height(64.dp).fillMaxWidth()
+            modifier = Modifier
+                .padding(top = 10.dp)
+                .height(64.dp)
+                .fillMaxWidth()
         ) {
             Text(
                 text = stringResource(id = R.string.shorten_it),

@@ -1,8 +1,5 @@
 package org.deafsapps.shortlyapp.urlshortening.domain.model
 
-@JvmInline
-value class Url(val value: String)
-
 data class ShortenUrlOperationBo(
     val status: ShortenUrlOpStatusBo,
     val result: ShortenUrlOpResultBo

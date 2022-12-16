@@ -6,7 +6,30 @@ import arrow.core.right
 import org.deafsapps.shortlyapp.common.data.model.FailureDto
 import org.deafsapps.shortlyapp.common.domain.model.ErrorMessage
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
+import org.deafsapps.shortlyapp.urlhistory.data.db.ShortenUrlOperationEntity
+import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOpResultBo
+import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOpStatusBo
+import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
 import retrofit2.Response
+
+
+fun ShortenUrlOperationBo.toEntity(): ShortenUrlOperationEntity =
+    ShortenUrlOperationEntity(
+        isSuccessful = status.isSuccessful,
+        code = result.code,
+        shortLink = result.shortLink,
+        fullShortLink = result.fullShortLink,
+    )
+
+fun ShortenUrlOperationEntity.toBo(): ShortenUrlOperationBo =
+    ShortenUrlOperationBo(
+        status = ShortenUrlOpStatusBo(isSuccessful = isSuccessful),
+        result = ShortenUrlOpResultBo(
+            code = code,
+            shortLink = shortLink,
+            fullShortLink = fullShortLink
+        )
+    )
 
 /**
  * This extension function provides a proceeding to handle with 'Retrofit' [Response] objects, so that

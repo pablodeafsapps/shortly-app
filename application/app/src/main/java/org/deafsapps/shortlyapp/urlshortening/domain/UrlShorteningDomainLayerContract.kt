@@ -1,12 +1,10 @@
 package org.deafsapps.shortlyapp.urlshortening.domain
 
 import arrow.core.Either
-import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.Dispatchers
 import org.deafsapps.shortlyapp.common.domain.DomainLayerContract
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
+import org.deafsapps.shortlyapp.common.domain.model.Url
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
-import org.deafsapps.shortlyapp.urlshortening.domain.model.Url
 
 /**
  * Gathers all protocols to interact with the 'url shortening' domain layer.
@@ -22,12 +20,12 @@ interface UrlShorteningDomainLayerContract : DomainLayerContract {
     interface DataLayer {
 
         /**
-         * Defines the requirements that an entity must fulfill to become the 'url shortening'
-         * data layer
+         * Defines the requirements for an entity to become the 'data-layer' of this feature
          */
         interface Repository {
             /**
-             * Logs-in a user according to certain info parameters
+             * Shortens a [Url]
+             *
              * @param url to be shortened
              * @return A [ShortenUrlOperationBo] data if it is successful or a [FailureBo] otherwise
              */
