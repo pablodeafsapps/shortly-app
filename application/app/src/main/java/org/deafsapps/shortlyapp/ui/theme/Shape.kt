@@ -1,4 +1,4 @@
-package org.pablodeafsapps.shortlyapp.ui.theme
+package org.deafsapps.shortlyapp.ui.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes

@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">Shortly App</string>
+
+    <string name="get_started">Let\'s get started</string>
+    <string name="paste_your_first_link">Paste your first link into\nthe field to shorten it</string>
+
+    <string name="shorten_a_link_here">Shorten a link here…</string>
+    <string name="please_add_a_link_here">Please add a link here</string>
+    <string name="shorten_it">SHORTEN IT!</string>
 </resources>
