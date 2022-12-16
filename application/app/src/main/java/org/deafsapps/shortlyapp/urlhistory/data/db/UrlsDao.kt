@@ -5,12 +5,13 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface UrlsDao {
 
     @Query("SELECT * FROM urls_table")
-    suspend fun getAllUrls(): List<ShortenUrlOperationEntity>
+    fun getAllUrlsFlow(): Flow<List<ShortenUrlOperationEntity>>
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(urlEntity: ShortenUrlOperationEntity) : Long

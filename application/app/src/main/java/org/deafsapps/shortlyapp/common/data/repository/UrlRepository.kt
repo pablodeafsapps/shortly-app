@@ -1,7 +1,10 @@
 package org.deafsapps.shortlyapp.common.data.repository
 
 import arrow.core.Either
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.deafsapps.shortlyapp.common.data.utils.toBo
+import org.deafsapps.shortlyapp.common.data.utils.toBoList
 import org.deafsapps.shortlyapp.common.data.utils.toEntity
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
 import org.deafsapps.shortlyapp.common.domain.model.Url
@@ -19,6 +22,9 @@ object UrlRepository : UrlShorteningDomainLayerContract.DataLayer.Repository,
 
     override suspend fun shortenUrl(url: Url): Either<FailureBo, ShortenUrlOperationBo> =
         shortenUrlDatasource.getShortenedUrl(urlString = url.value)
+
+    override suspend fun fetchAllShortenedUrlsAsync(): Flow<Either<FailureBo, List<ShortenUrlOperationBo>>> =
+        urlHistoryDatasource.fetchAllUrlsAsync().map { e -> e.map { it.toBoList() } }
 
     override suspend fun saveShortenedUrl(url: ShortenUrlOperationBo): Either<FailureBo, ShortenUrlOperationBo> =
         urlHistoryDatasource.saveUrl(urlEntity = url.toEntity()).map { it.toBo() }

@@ -4,6 +4,7 @@ import arrow.core.Either
 import arrow.core.flatMap
 import arrow.core.left
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.withContext
 import org.deafsapps.shortlyapp.common.domain.DomainLayerContract
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
 import org.deafsapps.shortlyapp.common.domain.model.Url
@@ -22,8 +23,10 @@ class ShortenAndPersistUrlUc(
         dispatcherWorker: CoroutineDispatcher
     ): Either<FailureBo, ShortenUrlOperationBo> =
         params?.takeIf { url -> url.isValid() }?.let { url ->
-            shortenUrlRepository.shortenUrl(url = url).flatMap { r ->
-                urlHistoryRepository.saveShortenedUrl(url = r)
+            withContext(dispatcherWorker) {
+                shortenUrlRepository.shortenUrl(url = url).flatMap { r ->
+                    urlHistoryRepository.saveShortenedUrl(url = r)
+                }
             }
         } ?: run { FailureBo.Error("Invalid input params").left() }
 

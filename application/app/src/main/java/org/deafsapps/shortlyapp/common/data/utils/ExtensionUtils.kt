@@ -21,6 +21,9 @@ fun ShortenUrlOperationBo.toEntity(): ShortenUrlOperationEntity =
         fullShortLink = result.fullShortLink,
     )
 
+fun List<ShortenUrlOperationEntity>.toBoList(): List<ShortenUrlOperationBo> =
+    map { entity -> entity.toBo() }
+
 fun ShortenUrlOperationEntity.toBo(): ShortenUrlOperationBo =
     ShortenUrlOperationBo(
         status = ShortenUrlOpStatusBo(isSuccessful = isSuccessful),

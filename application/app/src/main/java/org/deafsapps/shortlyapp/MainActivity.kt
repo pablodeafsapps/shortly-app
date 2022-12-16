@@ -33,8 +33,10 @@ import org.deafsapps.shortlyapp.common.data.db.ApplicationDatabase
 import org.deafsapps.shortlyapp.common.data.repository.UrlRepository
 import org.deafsapps.shortlyapp.common.presentation.viewmodel.ShortenUrlViewModel
 import org.deafsapps.shortlyapp.common.utils.getRetrofitInstance
+import org.deafsapps.shortlyapp.common.utils.navigateSingleTopTo
 import org.deafsapps.shortlyapp.ui.theme.ShortlyAppTheme
-import org.deafsapps.shortlyapp.urlhistory.data.datasource.ShortenUrlHistoryDataSource
+import org.deafsapps.shortlyapp.urlhistory.data.datasource.ShortenedUrlHistoryDataSource
+import org.deafsapps.shortlyapp.urlhistory.domain.usecase.FetchAllShortenedUrlsAsyncUc
 import org.deafsapps.shortlyapp.urlshortening.data.datasource.ShrtcodeDatasource
 import org.deafsapps.shortlyapp.urlshortening.domain.usecase.ShortenAndPersistUrlUc
 import org.deafsapps.shortlyapp.urlshortening.presentation.view.ShortenedUrlHistoryScreen
@@ -52,7 +54,15 @@ class MainActivity : ComponentActivity() {
                         retrofit = getRetrofitInstance(converterFactory = MoshiConverterFactory.create(moshi))
                     )
                 }, urlHistoryRepository = UrlRepository.apply {
-                    urlHistoryDatasource = ShortenUrlHistoryDataSource(
+                    urlHistoryDatasource = ShortenedUrlHistoryDataSource(
+                        roomDatabaseInstance = Room.databaseBuilder(
+                            applicationContext, ApplicationDatabase::class.java, "shorten-url-db"
+                        ).build()
+                    )
+                }),
+            fetchAllShortenedUrlsAsyncUc = FetchAllShortenedUrlsAsyncUc(
+                urlHistoryRepository = UrlRepository.apply {
+                    urlHistoryDatasource = ShortenedUrlHistoryDataSource(
                         roomDatabaseInstance = Room.databaseBuilder(
                             applicationContext, ApplicationDatabase::class.java, "shorten-url-db"
                         ).build()
@@ -83,11 +93,11 @@ private fun ShortlyApp(viewModel: ShortenUrlViewModel?) {
                 ShortlyBottomComponent(
                     hasInputError = uiState?.value?.hasInputError,
                     onShortenUrlSelected = { urlString ->
-                    if (navController.currentDestination?.route == Welcome.route) {
-                        navController.navigate(ShortenedUrlHistory.route)
+                        if (navController.currentDestination?.route == Welcome.route) {
+                            navController.navigate(ShortenedUrlHistory.route)
+                        }
+                        viewModel?.onShortenUrlSelected(urlString = urlString)
                     }
-                    viewModel?.onShortenUrlSelected(urlString = urlString)
-                }
                 )
             }
         ) { innerPadding ->
@@ -100,7 +110,7 @@ private fun ShortlyApp(viewModel: ShortenUrlViewModel?) {
 }
 
 @Composable
-fun ShortlyNavHost(
+private fun ShortlyNavHost(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
@@ -120,7 +130,7 @@ fun ShortlyNavHost(
 }
 
 @Composable
-fun ShortlyBottomComponent(
+private fun ShortlyBottomComponent(
     hasInputError: Boolean?,
     onShortenUrlSelected: (String) -> Unit,
     modifier: Modifier = Modifier

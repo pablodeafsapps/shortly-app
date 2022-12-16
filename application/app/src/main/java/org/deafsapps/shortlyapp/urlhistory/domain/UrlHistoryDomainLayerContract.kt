@@ -1,8 +1,10 @@
 package org.deafsapps.shortlyapp.urlhistory.domain
 
 import arrow.core.Either
+import kotlinx.coroutines.flow.Flow
 import org.deafsapps.shortlyapp.common.domain.DomainLayerContract
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
+import org.deafsapps.shortlyapp.urlhistory.data.db.ShortenUrlOperationEntity
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOpResultBo
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
 
@@ -24,6 +26,14 @@ interface UrlHistoryDomainLayerContract : DomainLayerContract {
          * data layer
          */
         interface Repository {
+            /**
+             * Subscribes to a [Flow] bringing all available [ShortenUrlOperationEntity]
+             *
+             * @return A [Flow] to all available [ShortenUrlOperationBo] persisted so far or a
+             * [FailureBo] if none
+             */
+            suspend fun fetchAllShortenedUrlsAsync(): Flow<Either<FailureBo, List<ShortenUrlOperationBo>>>
+
             /**
              * Persists a shortened link
              *

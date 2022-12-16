@@ -3,6 +3,7 @@ package org.deafsapps.shortlyapp.common.domain
 import arrow.core.Either
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
 
 /**
@@ -20,7 +21,7 @@ interface DomainLayerContract {
     interface PresentationLayer {
 
         /**
-         * Defines baseline use-case using Kotlin Coroutines
+         * Defines a baseline use-case using Kotlin Coroutines
          */
         interface UseCase<in T, out S> {
 
@@ -28,6 +29,18 @@ interface DomainLayerContract {
                 params: T? = null,
                 dispatcherWorker: CoroutineDispatcher = Dispatchers.IO
             ): Either<FailureBo, S>
+
+        }
+
+        /**
+         * Defines a baseline use-case using Kotlin Flow
+         */
+        interface FlowUseCase<in T, out S> {
+
+            suspend operator fun invoke(
+                params: T? = null,
+                dispatcherWorker: CoroutineDispatcher = Dispatchers.IO
+            ): Flow<Either<FailureBo, S>>
 
         }
 
