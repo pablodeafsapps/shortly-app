@@ -12,13 +12,13 @@ import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOpStatusBo
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
 import retrofit2.Response
 
-
 fun ShortenUrlOperationBo.toEntity(): ShortenUrlOperationEntity =
     ShortenUrlOperationEntity(
         isSuccessful = status.isSuccessful,
         code = result.code,
         shortLink = result.shortLink,
         fullShortLink = result.fullShortLink,
+        originalLink = result.originalLink
     )
 
 fun List<ShortenUrlOperationEntity>.toBoList(): List<ShortenUrlOperationBo> =
@@ -30,7 +30,8 @@ fun ShortenUrlOperationEntity.toBo(): ShortenUrlOperationBo =
         result = ShortenUrlOpResultBo(
             code = code,
             shortLink = shortLink,
-            fullShortLink = fullShortLink
+            fullShortLink = fullShortLink,
+            originalLink = originalLink
         )
     )
 

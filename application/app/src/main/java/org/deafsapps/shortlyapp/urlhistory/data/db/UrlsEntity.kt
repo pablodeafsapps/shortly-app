@@ -11,4 +11,5 @@ data class ShortenUrlOperationEntity(
     val code: String,
     @ColumnInfo(name = "short_link") val shortLink: String,
     @ColumnInfo(name = "full_short_link") val fullShortLink: String,
+    @ColumnInfo(name = "original_link") val originalLink: String
 )

@@ -11,5 +11,6 @@ value class ShortenUrlOpStatusBo(val isSuccessful: Boolean)
 data class ShortenUrlOpResultBo(
     val code: String,
     val shortLink: String,
-    val fullShortLink: String
+    val fullShortLink: String,
+    val originalLink: String
 )

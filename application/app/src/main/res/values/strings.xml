@@ -7,4 +7,6 @@
     <string name="shorten_a_link_here">Shorten a link here…</string>
     <string name="please_add_a_link_here">Please add a link here</string>
     <string name="shorten_it">SHORTEN IT!</string>
+    <string name="your_link_history">Your Link History</string>
+    <string name="copy">COPY</string>
 </resources>

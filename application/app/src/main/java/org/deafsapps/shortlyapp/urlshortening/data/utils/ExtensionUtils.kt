@@ -16,5 +16,6 @@ private fun ShortenUrlOpResultDto.toBo(): ShortenUrlOpResultBo =
     ShortenUrlOpResultBo(
         code = code,
         shortLink = shortLink,
-        fullShortLink = fullShortLink
+        fullShortLink = fullShortLink,
+        originalLink = originalLink
     )

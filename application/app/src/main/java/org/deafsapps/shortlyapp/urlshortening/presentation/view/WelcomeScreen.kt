@@ -18,7 +18,7 @@ import org.deafsapps.shortlyapp.R
 import org.deafsapps.shortlyapp.ui.theme.ShortlyAppTheme
 
 @Composable
-fun WelcomeScreen(modifier: Modifier = Modifier) {
+fun WelcomeScreen() {
     Column(
         modifier = Modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally

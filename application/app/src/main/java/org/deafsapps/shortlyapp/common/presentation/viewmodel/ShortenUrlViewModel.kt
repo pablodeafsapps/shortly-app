@@ -23,9 +23,10 @@ class ShortenUrlViewModel(
     private val shortenedUrlHistory: MutableStateFlow<List<ShortenUrlOperationBo>> = MutableStateFlow(emptyList())
     private val defaultUiState: UiState = UiState()
 
-    override val uiState: StateFlow<UiState> = combine(shortenedUrl, hasInputError, shortenedUrlHistory) { url, hasError, urlHistory ->
-        UiState(shortenedUrl = url, hasInputError = hasError, shortenedUrlHistory = urlHistory)
-    }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(), defaultUiState)
+    override val uiState: StateFlow<UiState> =
+        combine(shortenedUrl, hasInputError, shortenedUrlHistory) { url, hasError, urlHistory ->
+            UiState(shortenedUrl = url, hasInputError = hasError, shortenedUrlHistory = urlHistory)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), defaultUiState)
 
     init {
         viewModelScope.launch {
@@ -35,7 +36,7 @@ class ShortenUrlViewModel(
                 }, { operation ->
                     shortenedUrlHistory.update { operation }
                 })
-            }
+            }.collect()
         }
     }
 
@@ -50,6 +51,10 @@ class ShortenUrlViewModel(
                 println("${operation.status}, ${operation.result.shortLink}")
             })
         }
+    }
+
+    fun onRemoveShortenUrlSelected(shortenUrl: ShortenUrlOperationBo) {
+        // TODO: implement remove item
     }
 
     data class UiState(

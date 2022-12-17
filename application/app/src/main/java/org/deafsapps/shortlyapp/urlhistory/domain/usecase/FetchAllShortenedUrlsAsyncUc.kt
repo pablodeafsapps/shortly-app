@@ -3,7 +3,7 @@ package org.deafsapps.shortlyapp.urlhistory.domain.usecase
 import arrow.core.Either
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.flow.flowOn
 import org.deafsapps.shortlyapp.common.domain.DomainLayerContract
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
 import org.deafsapps.shortlyapp.urlhistory.domain.UrlHistoryDomainLayerContract
@@ -17,8 +17,7 @@ class FetchAllShortenedUrlsAsyncUc(
         params: Unit?,
         dispatcherWorker: CoroutineDispatcher
     ): Flow<Either<FailureBo, List<ShortenUrlOperationBo>>> =
-        withContext(dispatcherWorker) {
-            urlHistoryRepository.fetchAllShortenedUrlsAsync()
-        }
+        urlHistoryRepository.fetchAllShortenedUrlsAsync()
+            .flowOn(dispatcherWorker)
 
 }

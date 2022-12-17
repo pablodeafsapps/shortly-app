@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,13 +34,13 @@ import org.deafsapps.shortlyapp.common.data.db.ApplicationDatabase
 import org.deafsapps.shortlyapp.common.data.repository.UrlRepository
 import org.deafsapps.shortlyapp.common.presentation.viewmodel.ShortenUrlViewModel
 import org.deafsapps.shortlyapp.common.utils.getRetrofitInstance
-import org.deafsapps.shortlyapp.common.utils.navigateSingleTopTo
 import org.deafsapps.shortlyapp.ui.theme.ShortlyAppTheme
 import org.deafsapps.shortlyapp.urlhistory.data.datasource.ShortenedUrlHistoryDataSource
 import org.deafsapps.shortlyapp.urlhistory.domain.usecase.FetchAllShortenedUrlsAsyncUc
+import org.deafsapps.shortlyapp.urlhistory.presentation.view.ShortenedUrlHistoryScreen
 import org.deafsapps.shortlyapp.urlshortening.data.datasource.ShrtcodeDatasource
+import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
 import org.deafsapps.shortlyapp.urlshortening.domain.usecase.ShortenAndPersistUrlUc
-import org.deafsapps.shortlyapp.urlshortening.presentation.view.ShortenedUrlHistoryScreen
 import org.deafsapps.shortlyapp.urlshortening.presentation.view.WelcomeScreen
 import retrofit2.converter.moshi.MoshiConverterFactory
 
@@ -77,32 +78,38 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContent { ShortlyApp(viewModel = shortenUrlViewModel as? ShortenUrlViewModel) }
+        setContent { ShortlyApp(viewModel = shortenUrlViewModel as ShortenUrlViewModel) }
     }
 
 }
 
 @OptIn(ExperimentalLifecycleComposeApi::class)
 @Composable
-private fun ShortlyApp(viewModel: ShortenUrlViewModel?) {
+private fun ShortlyApp(viewModel: ShortenUrlViewModel) {
     ShortlyAppTheme {
         val navController: NavHostController = rememberNavController()
-        val uiState: State<ShortenUrlViewModel.UiState>? = viewModel?.uiState?.collectAsStateWithLifecycle()
+        val uiState: ShortenUrlViewModel.UiState by viewModel.uiState.collectAsStateWithLifecycle()
         Scaffold(
             bottomBar = {
                 ShortlyBottomComponent(
-                    hasInputError = uiState?.value?.hasInputError,
+                    hasInputError = uiState.hasInputError,
                     onShortenUrlSelected = { urlString ->
                         if (navController.currentDestination?.route == Welcome.route) {
                             navController.navigate(ShortenedUrlHistory.route)
                         }
-                        viewModel?.onShortenUrlSelected(urlString = urlString)
+                        viewModel.onShortenUrlSelected(urlString = urlString)
                     }
                 )
             }
         ) { innerPadding ->
             ShortlyNavHost(
                 navController = navController,
+                shortenUrlList = uiState.shortenedUrlHistory,
+                onRemoveSelected = { shortenUrl ->
+                                   viewModel.onRemoveShortenUrlSelected(shortenUrl = shortenUrl)
+
+
+                },
                 modifier = Modifier.padding(innerPadding)
             )
         }
@@ -112,6 +119,8 @@ private fun ShortlyApp(viewModel: ShortenUrlViewModel?) {
 @Composable
 private fun ShortlyNavHost(
     navController: NavHostController,
+    shortenUrlList: List<ShortenUrlOperationBo>,
+    onRemoveSelected: (ShortenUrlOperationBo) -> Unit,
     modifier: Modifier = Modifier
 ) {
     NavHost(
@@ -123,7 +132,7 @@ private fun ShortlyNavHost(
             WelcomeScreen()
         }
         composable(route = ShortenedUrlHistory.route) {
-            ShortenedUrlHistoryScreen()
+            ShortenedUrlHistoryScreen(list = shortenUrlList, onRemoveSelected = onRemoveSelected)
         }
     }
 
