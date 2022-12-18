@@ -1,5 +1,8 @@
 package org.deafsapps.shortlyapp.common.domain.model
 
+@JvmInline
+value class Url(val value: String)
+
 /**
  * A class which models any failure coming from any feature domain layer
  */

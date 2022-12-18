@@ -6,7 +6,37 @@ import arrow.core.right
 import org.deafsapps.shortlyapp.common.data.model.FailureDto
 import org.deafsapps.shortlyapp.common.domain.model.ErrorMessage
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
+import org.deafsapps.shortlyapp.urlhistory.data.db.ShortenUrlOperationEntity
+import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOpResultBo
+import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOpStatusBo
+import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
 import retrofit2.Response
+import java.util.*
+
+fun ShortenUrlOperationBo.toEntity(): ShortenUrlOperationEntity =
+    ShortenUrlOperationEntity(
+        uuidString = uuid.toString(),
+        isSuccessful = status.isSuccessful,
+        code = result.code,
+        shortLink = result.shortLink,
+        fullShortLink = result.fullShortLink,
+        originalLink = result.originalLink
+    )
+
+fun List<ShortenUrlOperationEntity>.toBoList(): List<ShortenUrlOperationBo> =
+    map { entity -> entity.toBo() }
+
+fun ShortenUrlOperationEntity.toBo(): ShortenUrlOperationBo =
+    ShortenUrlOperationBo(
+        uuid = UUID.fromString(uuidString),
+        status = ShortenUrlOpStatusBo(isSuccessful = isSuccessful),
+        result = ShortenUrlOpResultBo(
+            code = code,
+            shortLink = shortLink,
+            fullShortLink = fullShortLink,
+            originalLink = originalLink
+        )
+    )
 
 /**
  * This extension function provides a proceeding to handle with 'Retrofit' [Response] objects, so that
