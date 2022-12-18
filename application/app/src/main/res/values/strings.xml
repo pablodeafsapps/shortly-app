@@ -9,4 +9,5 @@
     <string name="shorten_it">SHORTEN IT!</string>
     <string name="your_link_history">Your Link History</string>
     <string name="copy">COPY</string>
+    <string name="copied">COPIED!</string>
 </resources>

@@ -28,7 +28,7 @@ class ShortenUrlViewModel(
 ) : StatefulViewModel<ShortenUrlViewModel.UiState>() {
 
     private val shortenedUrl: MutableStateFlow<String?> = MutableStateFlow(null)
-    private val hasInputError: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    private val hasInputError: MutableStateFlow<Boolean?> = MutableStateFlow(null)
     private val shortenedUrlHistory: MutableStateFlow<List<ShortenUrlOperationBo>> = MutableStateFlow(emptyList())
     private val defaultUiState: UiState = UiState()
     private val jsonUiStateAdapter: JsonAdapter<UiState> =
@@ -86,7 +86,7 @@ class ShortenUrlViewModel(
     @JsonClass(generateAdapter = true)
     data class UiState(
         val shortenedUrl: String? = null,
-        val hasInputError: Boolean = false,
+        val hasInputError: Boolean? = null,
         val shortenedUrlHistory: List<ShortenUrlOperationBo> = emptyList()
     ) : StatefulViewModel.UiState
 

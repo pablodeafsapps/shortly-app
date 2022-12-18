@@ -18,15 +18,15 @@ import org.deafsapps.shortlyapp.R
 import org.deafsapps.shortlyapp.ui.theme.ShortlyAppTheme
 
 @Composable
-fun WelcomeScreen() {
+fun WelcomeScreen(modifier: Modifier = Modifier) {
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Image(
             painter = painterResource(id = R.drawable.ic_logo),
             contentDescription = "title",
-            modifier = Modifier
+            modifier = modifier
                 .size(88.dp)
                 .weight(.4f)
         )
@@ -34,12 +34,12 @@ fun WelcomeScreen() {
             painter = painterResource(id = R.drawable.ic_illustration),
             contentDescription = "app logo",
             contentScale = ContentScale.Fit,
-            modifier = Modifier.weight(1f)
+            modifier = modifier.weight(1f)
         )
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center,
-            modifier = Modifier.weight(.4f).padding(bottom = 16.dp)
+            modifier = modifier.weight(.4f).padding(bottom = 16.dp)
         ) {
             Text(
                 text = stringResource(id = R.string.get_started),

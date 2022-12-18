@@ -1,15 +1,24 @@
 package org.deafsapps.shortlyapp.urlhistory.presentation.view
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -44,7 +53,7 @@ fun ShortenedUrlHistoryScreen(
             fontWeight = FontWeight.SemiBold,
             style = MaterialTheme.typography.h6,
             maxLines = 1,
-            modifier = Modifier
+            modifier = modifier
                 .padding(bottom = 16.dp)
                 .fillMaxWidth()
         )
@@ -75,7 +84,7 @@ private fun UrlHistoryItem(
     ) {
         Column {
             Row(
-                modifier = Modifier
+                modifier = modifier
                     .padding(start = 16.dp, top = 16.dp, end = 16.dp, bottom = 8.dp)
                     .fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -85,37 +94,45 @@ private fun UrlHistoryItem(
                     color = colorResource(id = R.color.dark_violet),
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
-                    modifier = Modifier.weight(1F)
+                    modifier = modifier.weight(1F)
                 )
                 Icon(
                     painter = painterResource(id = R.drawable.ic_trash), 
                     contentDescription = "trash",
-                    modifier = Modifier
+                    modifier = modifier
                         .padding(4.dp)
                         .clickable { onRemoveSelected(shortenUrl) }
                 )
             }
             Divider(color = DarkViolet, thickness = 1.dp)
             Column(
-                modifier = Modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 16.dp)
+                modifier = modifier.padding(start = 16.dp, top = 8.dp, end = 16.dp, bottom = 16.dp)
             ) {
+                val context: Context = LocalContext.current
                 Text(
                     text = shortenUrl.result.fullShortLink,
                     color = colorResource(id = R.color.cyan),
                     fontWeight = FontWeight.SemiBold,
                     maxLines = 1,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = modifier.fillMaxWidth()
                 )
+
+                val interactionSource = remember { MutableInteractionSource() }
+                val isPressed by interactionSource.collectIsPressedAsState()
+
                 Button(
-                    colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = R.color.cyan)),
+                    colors = ButtonDefaults.buttonColors(backgroundColor = colorResource(id = if (isPressed) R.color.cyan else R.color.dark_violet)),
                     onClick = {
+                        context.copyShortenUrlToClipboard(url = shortenUrl.result.shortLink)
                     },
-                    modifier = Modifier
+                    interactionSource = interactionSource,
+                    modifier = modifier
                         .padding(top = 24.dp)
+                        .clip(shape = Shapes.large)
                         .fillMaxWidth()
                 ) {
                     Text(
-                        text = stringResource(id = R.string.copy),
+                        text = stringResource(id = if (isPressed) R.string.copied else R.string.copy),
                         color = colorResource(id = R.color.white),
                         style = MaterialTheme.typography.h6,
                         fontWeight = FontWeight.Bold
@@ -125,6 +142,12 @@ private fun UrlHistoryItem(
         }
     }
 
+}
+
+private fun Context.copyShortenUrlToClipboard(url: String) {
+    val clipboardManager: ClipboardManager = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+    val clip = ClipData.newPlainText("shorten-url", url)
+    clipboardManager.setPrimaryClip(clip)
 }
 
 @Preview(showBackground = true)

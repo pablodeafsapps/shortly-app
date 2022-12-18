@@ -9,6 +9,7 @@ import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -33,6 +35,7 @@ import org.deafsapps.shortlyapp.common.data.db.ApplicationDatabase
 import org.deafsapps.shortlyapp.common.data.repository.UrlRepository
 import org.deafsapps.shortlyapp.common.presentation.viewmodel.ShortenUrlViewModel
 import org.deafsapps.shortlyapp.common.utils.getRetrofitInstance
+import org.deafsapps.shortlyapp.ui.theme.Shapes
 import org.deafsapps.shortlyapp.ui.theme.ShortlyAppTheme
 import org.deafsapps.shortlyapp.urlhistory.data.datasource.ShortenedUrlHistoryDataSource
 import org.deafsapps.shortlyapp.urlhistory.domain.usecase.FetchAllShortenedUrlsAsyncUc
@@ -106,14 +109,20 @@ private fun ShortlyApp(viewModel: ShortenUrlViewModel) {
                 ShortlyBottomComponent(
                     hasInputError = uiState.hasInputError,
                     onShortenUrlSelected = { urlString ->
-                        if (navController.currentDestination?.route == Welcome.route) {
-                            navController.navigate(ShortenedUrlHistory.route)
-                        }
                         viewModel.onShortenUrlSelected(urlString = urlString)
                     }
                 )
             }
         ) { innerPadding ->
+            navController.navigateToUrlHistoryIfPredicate(
+                predicate = booleanArrayOf(
+                    uiState.shortenedUrlHistory.isNotEmpty(),
+                    uiState.hasInputError == false
+                )
+            )
+            if (uiState.shortenedUrlHistory.isNotEmpty() && uiState.hasInputError == false) {
+                navController.navigate(ShortenedUrlHistory.route)
+            }
             ShortlyNavHost(
                 navController = navController,
                 shortenUrlList = uiState.shortenedUrlHistory,
@@ -124,6 +133,10 @@ private fun ShortlyApp(viewModel: ShortenUrlViewModel) {
             )
         }
     }
+}
+
+private fun NavController.navigateToUrlHistoryIfPredicate(vararg predicate: Boolean) {
+    if (predicate.all { true }) { navigate(ShortenedUrlHistory.route) }
 }
 
 @Composable
@@ -156,7 +169,7 @@ private fun ShortlyBottomComponent(
 ) {
     var inputValue by remember { mutableStateOf("") }
     Column(
-        modifier = Modifier
+        modifier = modifier
             .background(colorResource(id = R.color.dark_violet))
             .paint(
                 painter = painterResource(R.drawable.default_shape), alignment = Alignment.TopEnd
@@ -178,9 +191,10 @@ private fun ShortlyBottomComponent(
                     fontSize = 16.sp, textAlign = TextAlign.Center, fontWeight = FontWeight.Bold
                 ),
                 placeholder = { ShortenUrlPlaceholder(hasInputError = hasInputError) },
-                modifier = Modifier
-                    .height(64.dp)
-                    .fillMaxSize()
+                modifier = modifier
+                    .clip(shape = Shapes.large)
+                    .height(50.dp)
+                    .fillMaxWidth()
             )
         }
         Button(
@@ -189,15 +203,15 @@ private fun ShortlyBottomComponent(
                 onShortenUrlSelected(inputValue)
                 inputValue = ""
                       },
-            modifier = Modifier
+            modifier = modifier
                 .padding(top = 10.dp)
-                .height(64.dp)
+                .clip(shape = Shapes.large)
                 .fillMaxWidth()
         ) {
             Text(
                 text = stringResource(id = R.string.shorten_it),
                 color = colorResource(id = R.color.white),
-                style = MaterialTheme.typography.h5,
+                style = MaterialTheme.typography.h6,
                 fontWeight = FontWeight.Bold
             )
         }
@@ -205,15 +219,17 @@ private fun ShortlyBottomComponent(
 }
 
 @Composable
-private fun ShortenUrlPlaceholder(hasInputError: Boolean?) {
+private fun ShortenUrlPlaceholder(
+    hasInputError: Boolean?,
+    modifier: Modifier = Modifier
+) {
     Text(
         text = stringResource(id = if (hasInputError == true) R.string.please_add_a_link_here else R.string.shorten_a_link_here),
         color = colorResource(id = if (hasInputError == true) R.color.red else R.color.light_gray),
         fontSize = 16.sp,
         fontWeight = FontWeight.SemiBold,
         textAlign = TextAlign.Center,
-        modifier = Modifier
-            .padding(top = 5.dp)
+        modifier = modifier
             .fillMaxSize()
     )
 }
