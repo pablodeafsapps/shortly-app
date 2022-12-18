@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.map
 import org.deafsapps.shortlyapp.common.data.db.ApplicationDatabase
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
 import org.deafsapps.shortlyapp.urlhistory.data.db.ShortenUrlOperationEntity
+import java.util.UUID
 
 interface UrlHistoryDatasource {
 
@@ -22,9 +23,9 @@ interface UrlHistoryDatasource {
     suspend fun saveUrl(urlEntity: ShortenUrlOperationEntity): Either<FailureBo, ShortenUrlOperationEntity>
 
     /**
-     * Deletes a given [ShortenUrlOperationEntity]
+     * Deletes an entity uniquely identified by [urlUuid]
      */
-    suspend fun deleteUrl(urlEntity: ShortenUrlOperationEntity): Either<FailureBo, ShortenUrlOperationEntity>
+    suspend fun deleteUrl(urlUuid: UUID): Either<FailureBo, Int>
 
 }
 
@@ -50,10 +51,10 @@ class ShortenedUrlHistoryDataSource(
             }
         }
 
-    override suspend fun deleteUrl(urlEntity: ShortenUrlOperationEntity): Either<FailureBo, ShortenUrlOperationEntity> =
-        roomDatabaseInstance.urlsDao().delete(urlEntity = urlEntity).let { deletionCode ->
-            if (deletionCode == 1) {
-                urlEntity.right()
+    override suspend fun deleteUrl(urlUuid: UUID): Either<FailureBo, Int> =
+        roomDatabaseInstance.urlsDao().delete(urlUuidString = urlUuid.toString()).let { deletionCode ->
+            if (deletionCode > 0) {
+                deletionCode.right()
             } else {
                 FailureBo.Error("'Url' couldn't be deleted").left()
             }

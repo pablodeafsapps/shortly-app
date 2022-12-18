@@ -1,7 +1,6 @@
 package org.deafsapps.shortlyapp.urlhistory.data.db
 
 import androidx.room.Dao
-import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -16,7 +15,7 @@ interface UrlsDao {
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     suspend fun insert(urlEntity: ShortenUrlOperationEntity) : Long
 
-    @Delete
-    suspend fun delete(urlEntity: ShortenUrlOperationEntity) : Int
+    @Query("DELETE FROM urls_table WHERE uuidString = :urlUuidString")
+    suspend fun delete(urlUuidString: String) : Int
 
 }

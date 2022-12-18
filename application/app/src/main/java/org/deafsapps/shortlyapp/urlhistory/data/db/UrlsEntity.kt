@@ -7,6 +7,7 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "urls_table")
 data class ShortenUrlOperationEntity(
     @PrimaryKey(autoGenerate = true) val id: Int = 0,
+    val uuidString: String,
     val isSuccessful: Boolean,
     val code: String,
     @ColumnInfo(name = "short_link") val shortLink: String,

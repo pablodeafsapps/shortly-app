@@ -52,7 +52,7 @@ fun ShortenedUrlHistoryScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp),
             contentPadding = PaddingValues(vertical = 16.dp)
         ) {
-            items(list) { url ->
+            items(items = list, key = { item -> item.uuid }) { url ->
                 UrlHistoryItem(
                     shortenUrl = url,
                     onRemoveSelected = onRemoveSelected

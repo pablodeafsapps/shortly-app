@@ -7,6 +7,7 @@ import org.deafsapps.shortlyapp.common.domain.model.FailureBo
 import org.deafsapps.shortlyapp.urlhistory.data.db.ShortenUrlOperationEntity
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOpResultBo
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
+import java.util.UUID
 
 /**
  * Gathers all protocols to interact with the 'url history' domain layer.
@@ -44,13 +45,13 @@ interface UrlHistoryDomainLayerContract : DomainLayerContract {
             suspend fun saveShortenedUrl(url: ShortenUrlOperationBo): Either<FailureBo, ShortenUrlOperationBo>
 
             /**
-             * Deletes a shortened link
+             * Removes a shortened link
              *
-             * @param url to be deleted
+             * @param urlUuid the unique identifier of the entry to be removed
              * @return The [ShortenUrlOperationBo] deleted if it is successful or a [FailureBo]
              * otherwise
              */
-            suspend fun deleteShortenedUrl(url: ShortenUrlOperationBo): Either<FailureBo, ShortenUrlOperationBo>
+            suspend fun removeShortenedUrl(urlUuid: UUID): Either<FailureBo, Int>
 
         }
 

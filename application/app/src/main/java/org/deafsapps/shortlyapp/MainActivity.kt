@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.ExperimentalLifecycleComposeApi
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -37,6 +36,7 @@ import org.deafsapps.shortlyapp.common.utils.getRetrofitInstance
 import org.deafsapps.shortlyapp.ui.theme.ShortlyAppTheme
 import org.deafsapps.shortlyapp.urlhistory.data.datasource.ShortenedUrlHistoryDataSource
 import org.deafsapps.shortlyapp.urlhistory.domain.usecase.FetchAllShortenedUrlsAsyncUc
+import org.deafsapps.shortlyapp.urlhistory.domain.usecase.RemoveShortenedUrlUc
 import org.deafsapps.shortlyapp.urlhistory.presentation.view.ShortenedUrlHistoryScreen
 import org.deafsapps.shortlyapp.urlshortening.data.datasource.ShrtcodeDatasource
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
@@ -48,19 +48,6 @@ class MainActivity : ComponentActivity() {
 
     private val shortenUrlViewModelProvider : ShortenUrlViewModel.Provider by lazy {
         ShortenUrlViewModel.Provider(
-            shortenAndPersistUrlUc = ShortenAndPersistUrlUc(
-                shortenUrlRepository = UrlRepository.apply {
-                    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
-                    shortenUrlDatasource = ShrtcodeDatasource(
-                        retrofit = getRetrofitInstance(converterFactory = MoshiConverterFactory.create(moshi))
-                    )
-                }, urlHistoryRepository = UrlRepository.apply {
-                    urlHistoryDatasource = ShortenedUrlHistoryDataSource(
-                        roomDatabaseInstance = Room.databaseBuilder(
-                            applicationContext, ApplicationDatabase::class.java, "shorten-url-db"
-                        ).build()
-                    )
-                }),
             fetchAllShortenedUrlsAsyncUc = FetchAllShortenedUrlsAsyncUc(
                 urlHistoryRepository = UrlRepository.apply {
                     urlHistoryDatasource = ShortenedUrlHistoryDataSource(
@@ -68,7 +55,32 @@ class MainActivity : ComponentActivity() {
                             applicationContext, ApplicationDatabase::class.java, "shorten-url-db"
                         ).build()
                     )
-                }),
+                }
+            ),
+            shortenAndPersistUrlUc = ShortenAndPersistUrlUc(
+                shortenUrlRepository = UrlRepository.apply {
+                    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                    shortenUrlDatasource = ShrtcodeDatasource(
+                        retrofit = getRetrofitInstance(converterFactory = MoshiConverterFactory.create(moshi))
+                    )
+                },
+                urlHistoryRepository = UrlRepository.apply {
+                    urlHistoryDatasource = ShortenedUrlHistoryDataSource(
+                        roomDatabaseInstance = Room.databaseBuilder(
+                            applicationContext, ApplicationDatabase::class.java, "shorten-url-db"
+                        ).build()
+                    )
+                }
+            ),
+            removeShortenedUrlUc = RemoveShortenedUrlUc(
+                urlHistoryRepository = UrlRepository.apply {
+                    urlHistoryDatasource = ShortenedUrlHistoryDataSource(
+                        roomDatabaseInstance = Room.databaseBuilder(
+                            applicationContext, ApplicationDatabase::class.java, "shorten-url-db"
+                        ).build()
+                    )
+                }
+            ),
             owner = this
         )
     }
@@ -106,9 +118,7 @@ private fun ShortlyApp(viewModel: ShortenUrlViewModel) {
                 navController = navController,
                 shortenUrlList = uiState.shortenedUrlHistory,
                 onRemoveSelected = { shortenUrl ->
-                                   viewModel.onRemoveShortenUrlSelected(shortenUrl = shortenUrl)
-
-
+                    viewModel.onRemoveShortenUrlSelected(urlUuid = shortenUrl.uuid)
                 },
                 modifier = Modifier.padding(innerPadding)
             )

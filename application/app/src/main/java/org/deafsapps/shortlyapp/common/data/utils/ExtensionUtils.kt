@@ -11,9 +11,11 @@ import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOpResultBo
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOpStatusBo
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
 import retrofit2.Response
+import java.util.*
 
 fun ShortenUrlOperationBo.toEntity(): ShortenUrlOperationEntity =
     ShortenUrlOperationEntity(
+        uuidString = uuid.toString(),
         isSuccessful = status.isSuccessful,
         code = result.code,
         shortLink = result.shortLink,
@@ -26,6 +28,7 @@ fun List<ShortenUrlOperationEntity>.toBoList(): List<ShortenUrlOperationBo> =
 
 fun ShortenUrlOperationEntity.toBo(): ShortenUrlOperationBo =
     ShortenUrlOperationBo(
+        uuid = UUID.fromString(uuidString),
         status = ShortenUrlOpStatusBo(isSuccessful = isSuccessful),
         result = ShortenUrlOpResultBo(
             code = code,
