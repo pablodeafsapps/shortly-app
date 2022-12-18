@@ -12,8 +12,9 @@ import org.deafsapps.shortlyapp.common.utils.isValid
 import org.deafsapps.shortlyapp.urlhistory.domain.UrlHistoryDomainLayerContract
 import org.deafsapps.shortlyapp.urlshortening.domain.UrlShorteningDomainLayerContract
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
+import javax.inject.Inject
 
-class ShortenAndPersistUrlUc(
+class ShortenAndPersistUrlUc @Inject constructor(
     private val shortenUrlRepository: UrlShorteningDomainLayerContract.DataLayer.Repository,
     private val urlHistoryRepository: UrlHistoryDomainLayerContract.DataLayer.Repository
 ) : DomainLayerContract.PresentationLayer.UseCase<Url, ShortenUrlOperationBo> {

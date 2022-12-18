@@ -15,8 +15,7 @@ import org.deafsapps.shortlyapp.common.domain.DomainLayerContract
 import org.deafsapps.shortlyapp.common.domain.model.Url
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
 import org.deafsapps.shortlyapp.urlshortening.domain.model.UuidAdapter
-import java.util.*
-
+import javax.inject.Inject
 
 private const val UI_STATE_TAG = "ShortenUrlViewModelUiState"
 
@@ -24,7 +23,7 @@ class ShortenUrlViewModel(
     private val state: SavedStateHandle,
     val fetchAllShortenedUrlsAsyncUc: DomainLayerContract.PresentationLayer.FlowUseCase<Nothing, List<ShortenUrlOperationBo>>,
     val shortenAndPersistUrlUc: DomainLayerContract.PresentationLayer.UseCase<Url, ShortenUrlOperationBo>,
-    val removeShortenedUrlUc: DomainLayerContract.PresentationLayer.UseCase<UUID, Int>,
+    val removeShortenedUrlUc: DomainLayerContract.PresentationLayer.UseCase<ShortenUrlOperationBo, Int>,
 ) : StatefulViewModel<ShortenUrlViewModel.UiState>() {
 
     private val shortenedUrl: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -66,9 +65,9 @@ class ShortenUrlViewModel(
         }
     }
 
-    fun onRemoveShortenUrlSelected(urlUuid: UUID) {
+    fun onRemoveShortenUrlSelected(url: ShortenUrlOperationBo) {
         viewModelScope.launch {
-            removeShortenedUrlUc(params = urlUuid).fold({ failure ->
+            removeShortenedUrlUc(params = url).fold({ failure ->
                 System.err.println(failure.msg)
             }, { registersAffected ->
                 println("Registers removed: $registersAffected")
@@ -90,10 +89,10 @@ class ShortenUrlViewModel(
         val shortenedUrlHistory: List<ShortenUrlOperationBo> = emptyList()
     ) : StatefulViewModel.UiState
 
-    class Provider(
+    class Provider @Inject constructor(
         private val fetchAllShortenedUrlsAsyncUc: DomainLayerContract.PresentationLayer.FlowUseCase<Nothing, List<ShortenUrlOperationBo>>,
         private val shortenAndPersistUrlUc: DomainLayerContract.PresentationLayer.UseCase<Url, ShortenUrlOperationBo>,
-        private val removeShortenedUrlUc: DomainLayerContract.PresentationLayer.UseCase<UUID, Int>,
+        private val removeShortenedUrlUc: DomainLayerContract.PresentationLayer.UseCase<ShortenUrlOperationBo, Int>,
         owner: SavedStateRegistryOwner
     ) : AbstractSavedStateViewModelFactory(owner, null) {
 

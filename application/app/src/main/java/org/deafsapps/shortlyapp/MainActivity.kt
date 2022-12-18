@@ -127,7 +127,7 @@ private fun ShortlyApp(viewModel: ShortenUrlViewModel) {
                 navController = navController,
                 shortenUrlList = uiState.shortenedUrlHistory,
                 onRemoveSelected = { shortenUrl ->
-                    viewModel.onRemoveShortenUrlSelected(urlUuid = shortenUrl.uuid)
+                    viewModel.onRemoveShortenUrlSelected(url = shortenUrl)
                 },
                 modifier = Modifier.padding(innerPadding)
             )

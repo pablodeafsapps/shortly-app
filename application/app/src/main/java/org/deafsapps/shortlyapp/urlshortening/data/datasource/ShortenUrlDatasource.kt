@@ -9,6 +9,7 @@ import org.deafsapps.shortlyapp.urlshortening.data.service.ShrtcodeApiService
 import org.deafsapps.shortlyapp.urlshortening.data.utils.toBo
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
 import retrofit2.Retrofit
+import javax.inject.Inject
 
 interface ShortenUrlDatasource {
 
@@ -19,7 +20,7 @@ interface ShortenUrlDatasource {
 
 }
 
-class ShrtcodeDatasource(val retrofit: Retrofit) : ShortenUrlDatasource {
+class ShrtcodeDatasource @Inject constructor(val retrofit: Retrofit) : ShortenUrlDatasource {
 
     override suspend fun getShortenedUrl(urlString: String): Either<FailureBo, ShortenUrlOperationBo> =
         retrofit.create(ShrtcodeApiService::class.java).getShortenedUrl(urlString = urlString)

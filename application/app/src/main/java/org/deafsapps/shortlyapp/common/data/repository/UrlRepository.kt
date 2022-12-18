@@ -13,7 +13,6 @@ import org.deafsapps.shortlyapp.urlshortening.data.datasource.ShortenUrlDatasour
 import org.deafsapps.shortlyapp.urlhistory.data.datasource.UrlHistoryDatasource
 import org.deafsapps.shortlyapp.urlshortening.domain.UrlShorteningDomainLayerContract
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
-import java.util.UUID
 
 object UrlRepository : UrlShorteningDomainLayerContract.DataLayer.Repository,
     UrlHistoryDomainLayerContract.DataLayer.Repository {
@@ -30,7 +29,7 @@ object UrlRepository : UrlShorteningDomainLayerContract.DataLayer.Repository,
     override suspend fun saveShortenedUrl(url: ShortenUrlOperationBo): Either<FailureBo, ShortenUrlOperationBo> =
         urlHistoryDatasource.saveUrl(urlEntity = url.toEntity()).map { it.toBo() }
 
-    override suspend fun removeShortenedUrl(urlUuid: UUID): Either<FailureBo, Int> =
-        urlHistoryDatasource.deleteUrl(urlUuid = urlUuid)
+    override suspend fun removeShortenedUrl(url: ShortenUrlOperationBo): Either<FailureBo, Int> =
+        urlHistoryDatasource.deleteUrl(urlUuid = url.uuid)
 
 }
