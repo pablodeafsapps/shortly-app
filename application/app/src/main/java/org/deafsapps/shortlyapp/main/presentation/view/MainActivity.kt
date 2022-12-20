@@ -11,6 +11,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.paint
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -125,8 +126,10 @@ private fun ShortlyNavHost(
 
 }
 
+const val SHORTLY_BOTTOM_COMPONENT_URL_TEXT_FIELD_TAG = "shortlyBottomComponentUrlTextFieldTag"
+
 @Composable
-private fun ShortlyBottomComponent(
+fun ShortlyBottomComponent(
     hasInputError: Boolean?,
     onShortenUrlSelected: (String) -> Unit,
     modifier: Modifier = Modifier
@@ -159,6 +162,7 @@ private fun ShortlyBottomComponent(
                     .clip(shape = Shapes.large)
                     .height(50.dp)
                     .fillMaxWidth()
+                    .testTag(SHORTLY_BOTTOM_COMPONENT_URL_TEXT_FIELD_TAG)
             )
         }
         Button(
