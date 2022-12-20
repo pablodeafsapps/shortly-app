@@ -1,27 +1,23 @@
 package org.deafsapps.shortlyapp
 
 import android.app.Application
+import org.deafsapps.shortlyapp.common.di.ApplicationComponent
+import org.deafsapps.shortlyapp.common.di.DaggerApplicationComponent
+import org.deafsapps.shortlyapp.common.di.UtilsModule
+import org.deafsapps.shortlyapp.main.di.MainComponent
+import org.deafsapps.shortlyapp.main.di.MainComponentFactoryProvider
 
-class ShortlyApplication : Application() {
+class ShortlyApplication : Application(), MainComponentFactoryProvider {
 
-//    private lateinit var appComponent: ApplicationComponent
+    private lateinit var appComponent: ApplicationComponent
 
     override fun onCreate() {
         super.onCreate()
-//        appComponent = DaggerApplicationComponent.factory()
-//            .create(UtilsModule(applicationContext = applicationContext))
+        appComponent = DaggerApplicationComponent.factory()
+            .create(UtilsModule(applicationContext = applicationContext))
     }
 
-//    override fun provideMainComponentFactory(): MainComponent.Factory =
-//        appComponent.mainComponentFactory()
-//
-//    override fun provideCharactersComponentFactory(): CharactersComponent.Factory =
-//        appComponent.charactersComponentFactory()
-//
-//    override fun providesEpisodesComponent(): EpisodesComponent =
-//        appComponent.episodesComponentFactory().create()
-//
-//    override fun providesLoginComponent(): LoginComponent =
-//        appComponent.loginComponentFactory().create()
+    override fun provideMainComponentFactory(): MainComponent.Factory =
+        appComponent.mainComponentFactory()
 
 }

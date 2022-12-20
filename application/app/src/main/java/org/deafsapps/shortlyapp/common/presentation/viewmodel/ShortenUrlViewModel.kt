@@ -16,12 +16,13 @@ import org.deafsapps.shortlyapp.common.domain.model.Url
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
 import org.deafsapps.shortlyapp.urlshortening.domain.model.UuidAdapter
 import javax.inject.Inject
+import javax.inject.Named
 
 private const val UI_STATE_TAG = "ShortenUrlViewModelUiState"
 
 class ShortenUrlViewModel(
     private val state: SavedStateHandle,
-    val fetchAllShortenedUrlsAsyncUc: DomainLayerContract.PresentationLayer.FlowUseCase<Nothing, List<ShortenUrlOperationBo>>,
+    val fetchAllShortenedUrlsAsyncUc: DomainLayerContract.PresentationLayer.FlowUseCase<Unit, List<ShortenUrlOperationBo>>,
     val shortenAndPersistUrlUc: DomainLayerContract.PresentationLayer.UseCase<Url, ShortenUrlOperationBo>,
     val removeShortenedUrlUc: DomainLayerContract.PresentationLayer.UseCase<ShortenUrlOperationBo, Int>,
 ) : StatefulViewModel<ShortenUrlViewModel.UiState>() {
@@ -90,9 +91,12 @@ class ShortenUrlViewModel(
     ) : StatefulViewModel.UiState
 
     class Provider @Inject constructor(
-        private val fetchAllShortenedUrlsAsyncUc: DomainLayerContract.PresentationLayer.FlowUseCase<Nothing, List<ShortenUrlOperationBo>>,
-        private val shortenAndPersistUrlUc: DomainLayerContract.PresentationLayer.UseCase<Url, ShortenUrlOperationBo>,
-        private val removeShortenedUrlUc: DomainLayerContract.PresentationLayer.UseCase<ShortenUrlOperationBo, Int>,
+        @Named("fetchAllShortenedUrlsAsyncUc")
+        private val fetchAllShortenedUrlsAsyncUc: @JvmSuppressWildcards DomainLayerContract.PresentationLayer.FlowUseCase<Unit, List<ShortenUrlOperationBo>>,
+        @Named("shortenAndPersistUrlUc")
+        private val shortenAndPersistUrlUc: @JvmSuppressWildcards DomainLayerContract.PresentationLayer.UseCase<Url, ShortenUrlOperationBo>,
+        @Named("removeShortenedUrlUc")
+        private val removeShortenedUrlUc: @JvmSuppressWildcards DomainLayerContract.PresentationLayer.UseCase<ShortenUrlOperationBo, Int>,
         owner: SavedStateRegistryOwner
     ) : AbstractSavedStateViewModelFactory(owner, null) {
 

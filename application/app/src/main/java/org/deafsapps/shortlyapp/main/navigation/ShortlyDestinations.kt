@@ -1,4 +1,4 @@
-package org.deafsapps.shortlyapp.main
+package org.deafsapps.shortlyapp.main.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.History

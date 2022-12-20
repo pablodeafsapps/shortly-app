@@ -1,4 +1,4 @@
-package org.deafsapps.shortlyapp.main
+package org.deafsapps.shortlyapp.main.presentation.view
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -27,73 +27,32 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import androidx.room.Room
-import com.squareup.moshi.Moshi
 import org.deafsapps.shortlyapp.R
-import org.deafsapps.shortlyapp.common.base.StatefulViewModel
-import org.deafsapps.shortlyapp.common.data.db.ApplicationDatabase
-import org.deafsapps.shortlyapp.common.data.repository.UrlRepository
+import org.deafsapps.shortlyapp.ShortlyApplication
 import org.deafsapps.shortlyapp.common.presentation.viewmodel.ShortenUrlViewModel
-import org.deafsapps.shortlyapp.common.utils.getRetrofitInstance
+import org.deafsapps.shortlyapp.main.di.MainComponent
+import org.deafsapps.shortlyapp.main.di.MainPresentationModule
+import org.deafsapps.shortlyapp.main.navigation.ShortenedUrlHistory
+import org.deafsapps.shortlyapp.main.navigation.Welcome
 import org.deafsapps.shortlyapp.ui.theme.Shapes
 import org.deafsapps.shortlyapp.ui.theme.ShortlyAppTheme
-import org.deafsapps.shortlyapp.urlhistory.data.datasource.ShortenedUrlHistoryDataSource
-import org.deafsapps.shortlyapp.urlhistory.domain.usecase.FetchAllShortenedUrlsAsyncUc
-import org.deafsapps.shortlyapp.urlhistory.domain.usecase.RemoveShortenedUrlUc
 import org.deafsapps.shortlyapp.urlhistory.presentation.view.ShortenedUrlHistoryScreen
-import org.deafsapps.shortlyapp.urlshortening.data.datasource.ShrtcodeDatasource
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
-import org.deafsapps.shortlyapp.urlshortening.domain.usecase.ShortenAndPersistUrlUc
 import org.deafsapps.shortlyapp.urlshortening.presentation.view.WelcomeScreen
-import retrofit2.converter.moshi.MoshiConverterFactory
+import javax.inject.Inject
 
 class MainActivity : ComponentActivity() {
 
-    private val shortenUrlViewModelProvider : ShortenUrlViewModel.Provider by lazy {
-        ShortenUrlViewModel.Provider(
-            fetchAllShortenedUrlsAsyncUc = FetchAllShortenedUrlsAsyncUc(
-                urlHistoryRepository = UrlRepository.apply {
-                    urlHistoryDatasource = ShortenedUrlHistoryDataSource(
-                        roomDatabaseInstance = Room.databaseBuilder(
-                            applicationContext, ApplicationDatabase::class.java, "shorten-url-db"
-                        ).build()
-                    )
-                }
-            ),
-            shortenAndPersistUrlUc = ShortenAndPersistUrlUc(
-                shortenUrlRepository = UrlRepository.apply {
-                    val moshi = Moshi.Builder().build()
-                    shortenUrlDatasource = ShrtcodeDatasource(
-                        retrofit = getRetrofitInstance(converterFactory = MoshiConverterFactory.create(moshi))
-                    )
-                },
-                urlHistoryRepository = UrlRepository.apply {
-                    urlHistoryDatasource = ShortenedUrlHistoryDataSource(
-                        roomDatabaseInstance = Room.databaseBuilder(
-                            applicationContext, ApplicationDatabase::class.java, "shorten-url-db"
-                        ).build()
-                    )
-                }
-            ),
-            removeShortenedUrlUc = RemoveShortenedUrlUc(
-                urlHistoryRepository = UrlRepository.apply {
-                    urlHistoryDatasource = ShortenedUrlHistoryDataSource(
-                        roomDatabaseInstance = Room.databaseBuilder(
-                            applicationContext, ApplicationDatabase::class.java, "shorten-url-db"
-                        ).build()
-                    )
-                }
-            ),
-            owner = this
-        )
-    }
-    private val shortenUrlViewModel: StatefulViewModel<ShortenUrlViewModel.UiState> by lazy {
+    @Inject
+    lateinit var shortenUrlViewModelProvider: ShortenUrlViewModel.Provider
+    private val shortenUrlViewModel: ShortenUrlViewModel by lazy {
         ViewModelProvider(this, shortenUrlViewModelProvider)[ShortenUrlViewModel::class.java]
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        getApplicationComponent().inject(this)
         super.onCreate(savedInstanceState)
-        setContent { ShortlyApp(viewModel = shortenUrlViewModel as ShortenUrlViewModel) }
+        setContent { ShortlyApp(viewModel = shortenUrlViewModel) }
     }
 
 }
@@ -114,17 +73,12 @@ private fun ShortlyApp(viewModel: ShortenUrlViewModel) {
                 )
             }
         ) { innerPadding ->
-            val a = uiState.shortenedUrlHistory
-            val b = uiState.hasInputError
             navController.navigateToUrlHistoryIfPredicate(
                 predicate = booleanArrayOf(
                     uiState.shortenedUrlHistory.isNotEmpty(),
                     uiState.hasInputError == false
                 )
             )
-//            if (uiState.shortenedUrlHistory.isNotEmpty() && uiState.hasInputError == false) {
-//                navController.navigate(ShortenedUrlHistory.route)
-//            }
             ShortlyNavHost(
                 navController = navController,
                 shortenUrlList = uiState.shortenedUrlHistory,
@@ -137,8 +91,16 @@ private fun ShortlyApp(viewModel: ShortenUrlViewModel) {
     }
 }
 
+private fun MainActivity.getApplicationComponent(): MainComponent =
+    (application as ShortlyApplication).provideMainComponentFactory()
+        .create(presentationModule = MainPresentationModule(this))
+
 private fun NavController.navigateToUrlHistoryIfPredicate(vararg predicate: Boolean) {
-    if (predicate.all { it }) { navigate(ShortenedUrlHistory.route) }
+    if (predicate.all { it }) { navigateSingleTop(ShortenedUrlHistory.route) }
+}
+
+private fun NavController.navigateSingleTop(route: String) {
+    navigate(route) { launchSingleTop = true }
 }
 
 @Composable
@@ -238,7 +200,7 @@ private fun ShortenUrlPlaceholder(
 
 @Preview(showBackground = true)
 @Composable
-fun ShortlyBottomComponentPreview() {
+private fun ShortlyBottomComponentPreview() {
     ShortlyAppTheme {
         ShortlyBottomComponent(hasInputError = false, onShortenUrlSelected = {})
     }
