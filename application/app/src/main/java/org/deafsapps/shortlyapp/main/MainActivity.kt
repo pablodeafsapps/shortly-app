@@ -1,4 +1,4 @@
-package org.deafsapps.shortlyapp
+package org.deafsapps.shortlyapp.main
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -29,7 +29,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.room.Room
 import com.squareup.moshi.Moshi
-import com.squareup.moshi.kotlin.reflect.KotlinJsonAdapterFactory
+import org.deafsapps.shortlyapp.R
 import org.deafsapps.shortlyapp.common.base.StatefulViewModel
 import org.deafsapps.shortlyapp.common.data.db.ApplicationDatabase
 import org.deafsapps.shortlyapp.common.data.repository.UrlRepository
@@ -62,7 +62,7 @@ class MainActivity : ComponentActivity() {
             ),
             shortenAndPersistUrlUc = ShortenAndPersistUrlUc(
                 shortenUrlRepository = UrlRepository.apply {
-                    val moshi = Moshi.Builder().add(KotlinJsonAdapterFactory()).build()
+                    val moshi = Moshi.Builder().build()
                     shortenUrlDatasource = ShrtcodeDatasource(
                         retrofit = getRetrofitInstance(converterFactory = MoshiConverterFactory.create(moshi))
                     )
@@ -114,15 +114,17 @@ private fun ShortlyApp(viewModel: ShortenUrlViewModel) {
                 )
             }
         ) { innerPadding ->
+            val a = uiState.shortenedUrlHistory
+            val b = uiState.hasInputError
             navController.navigateToUrlHistoryIfPredicate(
                 predicate = booleanArrayOf(
                     uiState.shortenedUrlHistory.isNotEmpty(),
                     uiState.hasInputError == false
                 )
             )
-            if (uiState.shortenedUrlHistory.isNotEmpty() && uiState.hasInputError == false) {
-                navController.navigate(ShortenedUrlHistory.route)
-            }
+//            if (uiState.shortenedUrlHistory.isNotEmpty() && uiState.hasInputError == false) {
+//                navController.navigate(ShortenedUrlHistory.route)
+//            }
             ShortlyNavHost(
                 navController = navController,
                 shortenUrlList = uiState.shortenedUrlHistory,
@@ -136,7 +138,7 @@ private fun ShortlyApp(viewModel: ShortenUrlViewModel) {
 }
 
 private fun NavController.navigateToUrlHistoryIfPredicate(vararg predicate: Boolean) {
-    if (predicate.all { true }) { navigate(ShortenedUrlHistory.route) }
+    if (predicate.all { it }) { navigate(ShortenedUrlHistory.route) }
 }
 
 @Composable
