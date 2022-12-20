@@ -8,8 +8,9 @@ import org.deafsapps.shortlyapp.common.domain.DomainLayerContract
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
 import org.deafsapps.shortlyapp.urlhistory.domain.UrlHistoryDomainLayerContract
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
+import javax.inject.Inject
 
-class FetchAllShortenedUrlsAsyncUc(
+class FetchAllShortenedUrlsAsyncUc @Inject constructor(
     private val urlHistoryRepository: UrlHistoryDomainLayerContract.DataLayer.Repository
 ) : DomainLayerContract.PresentationLayer.FlowUseCase<Unit, List<ShortenUrlOperationBo>> {
 

@@ -7,19 +7,20 @@ import kotlinx.coroutines.withContext
 import org.deafsapps.shortlyapp.common.domain.DomainLayerContract
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
 import org.deafsapps.shortlyapp.urlhistory.domain.UrlHistoryDomainLayerContract
-import java.util.*
+import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
+import javax.inject.Inject
 
-class RemoveShortenedUrlUc(
+class RemoveShortenedUrlUc @Inject constructor(
     private val urlHistoryRepository: UrlHistoryDomainLayerContract.DataLayer.Repository
-) : DomainLayerContract.PresentationLayer.UseCase<UUID, Int> {
+) : DomainLayerContract.PresentationLayer.UseCase<ShortenUrlOperationBo, Int> {
 
     override suspend fun invoke(
-        params: UUID?,
+        params: ShortenUrlOperationBo?,
         dispatcherWorker: CoroutineDispatcher
     ): Either<FailureBo, Int> =
-        params?.let { uuid ->
+        params?.let { url ->
             withContext(dispatcherWorker) {
-                urlHistoryRepository.removeShortenedUrl(urlUuid = uuid)
+                urlHistoryRepository.removeShortenedUrl(url = url)
             }
         } ?: run { FailureBo.Error("Invalid input params").left() }
 

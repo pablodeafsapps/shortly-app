@@ -9,6 +9,7 @@ import org.deafsapps.shortlyapp.common.data.db.ApplicationDatabase
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
 import org.deafsapps.shortlyapp.urlhistory.data.db.ShortenUrlOperationEntity
 import java.util.UUID
+import javax.inject.Inject
 
 interface UrlHistoryDatasource {
 
@@ -29,7 +30,7 @@ interface UrlHistoryDatasource {
 
 }
 
-class ShortenedUrlHistoryDataSource(
+class ShortenedUrlHistoryDataSource @Inject constructor(
     private val roomDatabaseInstance: ApplicationDatabase
 ) : UrlHistoryDatasource {
 

@@ -5,9 +5,7 @@ import kotlinx.coroutines.flow.Flow
 import org.deafsapps.shortlyapp.common.domain.DomainLayerContract
 import org.deafsapps.shortlyapp.common.domain.model.FailureBo
 import org.deafsapps.shortlyapp.urlhistory.data.db.ShortenUrlOperationEntity
-import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOpResultBo
 import org.deafsapps.shortlyapp.urlshortening.domain.model.ShortenUrlOperationBo
-import java.util.UUID
 
 /**
  * Gathers all protocols to interact with the 'url history' domain layer.
@@ -47,11 +45,10 @@ interface UrlHistoryDomainLayerContract : DomainLayerContract {
             /**
              * Removes a shortened link
              *
-             * @param urlUuid the unique identifier of the entry to be removed
-             * @return The [ShortenUrlOperationBo] deleted if it is successful or a [FailureBo]
-             * otherwise
+             * @param url the entry to be removed
+             * @return The amount of entries affected by the operation, ideally only 1
              */
-            suspend fun removeShortenedUrl(urlUuid: UUID): Either<FailureBo, Int>
+            suspend fun removeShortenedUrl(url: ShortenUrlOperationBo): Either<FailureBo, Int>
 
         }
 
