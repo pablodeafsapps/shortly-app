@@ -46,6 +46,7 @@ class ShortenUrlViewModel(
             fetchAllShortenedUrlsAsyncUc().map { e ->
                 e.fold({ failure ->
                     System.err.println(failure.msg)
+                    shortenedUrlHistory.update { emptyList() }
                 }, { operation ->
                     shortenedUrlHistory.update { operation }
                 })
